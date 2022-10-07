@@ -727,7 +727,6 @@ def make_subject_images(mesh, curv, parc,
         parc_figs.append(parc_fig)
 
         # plot curvature
-        curv_save_fp = f'{curv_save_dir}/{sub}-{a[0]}-{a[1]}-curv.png'
         above_parc_threshold = selected_parc.max() + 1.0  # set threshold to exclude parc
         curv_fig, _ = plt.subplots(figsize=FIGSIZE)
         plotting.plot_surf_roi(mesh, selected_parc
@@ -737,7 +736,6 @@ def make_subject_images(mesh, curv, parc,
                                , figure=curv_fig
                                , cmap='tab20'
                                , threshold=above_parc_threshold
-                               # , output_file=curv_save_fp
                                # colorbar=True
                                )
         curv_figs.append(curv_fig)
