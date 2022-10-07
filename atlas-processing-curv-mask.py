@@ -92,6 +92,7 @@ def make_subject_stat_map(sub, df, return_mesh=True):
 
     sub_mesh = sub_df['Mesh'].iloc[0]
     sub_labs = list(sub_df['Label'])
+    
     sub_inds = list(sub_df['LabelIndex']) 
 
     c = sub_mesh.coordinates.shape[0]
