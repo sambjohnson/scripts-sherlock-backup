@@ -572,7 +572,7 @@ def get_freesurfer_subject(sub_dir, mesh_files, data_files,
     """ Given a subject's freesurfer directory, loads
         each freesurfer file in both mesh_files and map_files, and returns
         their nilearn objects in a dictionary {'name': nilearn_object}.
-        Arguemnts:
+        Arguments:
             sub_dir: (str) filepath to subject's top-level directory,
                 which would normally contain, e.g. /surf, /label, ...
             mesh_files: (list<str>) names of cortical meshes to load
@@ -598,6 +598,38 @@ def get_freesurfer_subject(sub_dir, mesh_files, data_files,
     return cortex_data
 
 
+def freesurfer_subject_data_exists(sub_dir, mesh_files, data_files,
+                                   surf_dir='surf'):
+    from nilearn import surface
+    import os
+    """ Given a subject's freesurfer directory, checks all
+        freesurfer files in both mesh_files and map_files, and returns
+        True iff they all exist.
+        Arguments:
+            sub_dir: (str) filepath to subject's top-level directory,
+                which would normally contain, e.g. /surf, /label, ...
+            mesh_files: (list<str>) names of cortical meshes to load
+            data_files: (list<str>) names of cortical stat_map files to load
+            surf_dir: (str) subdirectory of sub_dir that contains freesurfer
+                files of interest. Defaults to 'surf'.
+        Returns:
+            a boolean, True only if all required freesurfer subject files exist.
+    """
+    mesh_files_exist = []
+    if mesh_files is not None:
+        for mf in mesh_files:
+            fp = os.path.join(sub_dir, surf_dir, mf)
+            mesh_files_exist.append(os.path.exists(fp))
+
+    data_files_exist = []
+    if data_files is not None:
+        for df in data_files:
+            fp = os.path.join(sub_dir, surf_dir, df)
+            data_files_exist.append(os.path.exists(fp))
+
+    return all(mesh_files_exist + data_files_exist)
+
+
 def get_freesurfer_subject_with_parc(sub_dir, mesh_files, data_files,
                                      surf_dir='surf',
                                      label_files=None):
@@ -605,7 +637,7 @@ def get_freesurfer_subject_with_parc(sub_dir, mesh_files, data_files,
         each freesurfer file in both mesh_files and map_files, and returns
         their nilearn objects in a dictionary {'name': nilearn_object}.
         Also loads label files from the surf_dir 'label'
-        Arguemnts:
+        Arguments:
             sub_dir: (str) filepath to subject's top-level directory,
                 which would normally contain, e.g. /surf, /label, ...
             mesh_files: (list<str>) names of cortical meshes to load
@@ -900,13 +932,13 @@ def save_subject_npys(sub, np_dict, save_xdir, save_ydir,
                 pickle.dump(px2v, f)
 
         # optionally, save pxcoord
-        if save_px2v_dir is not None:
+        if save_pxcoord_dir is not None:
             pxcoord = np_dict['px_coord'][i]
             pxcoord_title = f'{base_title}-pxcoord.npy'
             fp_pxcoord = os.path.join(save_pxcoord_dir, pxcoord_title)
 
             with open(fp_pxcoord, 'wb') as f:
-                np.save(f, px2v)
+                np.save(f, pxcoord)
 
     return
 
