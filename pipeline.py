@@ -35,16 +35,15 @@ mesh_fn = 'lh.inflated'
 for sub in hbn_subjects[start:end]:
     
     subj_fp = os.path.join(hbn_dir, sub)
-    subject_data_exists = pu.freesurfer_subject_data_exists(subj_fp,
-                                                            [mesh_fn],
-                                                            [curv_fn],
-                                                            label_files=[parc_fn])
+    subject_data_exists = pu.freesurfer_subject_data_exists_parc(subj_fp, [mesh_fn],
+                                                                 [curv_fn],
+                                                                 label_files=[parc_fn])
     if not subject_data_exists:  # skip subject if required files don't exist
         continue
     subject_data = pu.get_freesurfer_subject_with_parc(subj_fp,
-                                                    [mesh_fn], 
-                                                    [curv_fn], 
-                                                    label_files=[parc_fn])
+                                                       [mesh_fn],
+                                                       [curv_fn],
+                                                       label_files=[parc_fn])
 
     mesh = subject_data[mesh_fn]
     curv = subject_data[curv_fn]

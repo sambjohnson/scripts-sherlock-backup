@@ -659,6 +659,34 @@ def get_freesurfer_subject_with_parc(sub_dir, mesh_files, data_files,
     return surf_dict
 
 
+def freesurfer_subject_data_exists_parc(sub_dir, mesh_files, data_files,
+                                        surf_dir='surf',
+                                        label_files=None):
+    """ Given a subject's freesurfer directory, loads
+        each freesurfer file in both mesh_files and map_files, and returns
+        their nilearn objects in a dictionary {'name': nilearn_object}.
+        Also loads label files from the surf_dir 'label'
+        Arguments:
+            sub_dir: (str) filepath to subject's top-level directory,
+                which would normally contain, e.g. /surf, /label, ...
+            mesh_files: (list<str>) names of cortical meshes to load
+            data_files: (list<str>) names of cortical stat_map files to load
+            surf_dir: (str) subdirectory of sub_dir that contains freesurfer
+                files of interest. Defaults to 'surf'.
+            label_files: list<str> names of label files to load from the /label dir.
+                Defaults to Destrieux parcellation, lh.aparc.a2009s.annot
+        Returns:
+            a dictionary {'name': nilearn_object} of each loaded object; names
+            are the same as specified in mesh_files and map_files.
+    """
+    if label_files is None:
+        label_files = ['lh.aparc.a2009s.annot']
+    surf_files_exist = freesurfer_subject_data_exists(sub_dir, mesh_files, data_files)
+    label_files_exist = freesurfer_subject_data_exists(sub_dir, mesh_files=None,
+                                                       data_files=label_files, surf_dir='label')
+    return surf_files_exist and label_files_exist
+
+
 def make_subject_coord_images(mesh, figs=None, a=None, figsize=(8, 8)):
     """ Make subject image to record x, y, and z of vertices.
         Saved as 3 grayscale images.
