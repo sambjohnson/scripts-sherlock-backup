@@ -35,10 +35,16 @@ mesh_fn = 'lh.inflated'
 for sub in hbn_subjects[start:end]:
     
     subj_fp = os.path.join(hbn_dir, sub)
+    subject_data_exists = pu.freesurfer_subject_data_exists(subj_fp,
+                                                            [mesh_fn],
+                                                            [curv_fn],
+                                                            label_files=[parc_fn])
+    if not subject_data_exists:  # skip subject if required files don't exist
+        continue
     subject_data = pu.get_freesurfer_subject_with_parc(subj_fp,
                                                     [mesh_fn], 
                                                     [curv_fn], 
-                                                    label_files = [parc_fn])
+                                                    label_files=[parc_fn])
 
     mesh = subject_data[mesh_fn]
     curv = subject_data[curv_fn]
@@ -58,9 +64,9 @@ for sub in hbn_subjects[start:end]:
         np_dict = pu.process_figs(fig_dict)
         np_px_dict = pu.px2v_from_np_dict(np_dict, 
                                           mesh_coords=mesh.coordinates)
-        plt.close('all')  # clear all matplotlib plots
+        plt.close('all')  # clear all matplotlib plots to save memory
         pu.save_subject_npys(sub, np_px_dict, save_xdir, save_ydir, 
                              save_px2v_dir=save_px2v_dir, 
                              save_pxcoord_dir=save_pxcoord_dir)
-        del np_dict
+        del np_dict  # clear dictionaries to save memory
         del np_px_dict
