@@ -723,7 +723,7 @@ def make_subject_coord_images(mesh, figs=None, a=None, figsize=(8, 8)):
     return coord_figs
 
 
-def make_subject_images(mesh, curv, parc,
+def make_subject_images(mesh, curv, parc, extra_channels_dict=None,
                         parc_save_dir=None,
                         curv_save_dir=None,
                         angles=None,
@@ -739,6 +739,9 @@ def make_subject_images(mesh, curv, parc,
                 curvature on the above mesh.
             parc: the stat_map nilearn object corresponding to
                 parcellation on the above mesh.
+            extra_channels_dict: (optional) if specified, a dictionary of
+                keys, values where the keys are names of stat maps to plot
+                and values are the stat maps.
             nangles: the total number of angles to generate for this subject.
             nonrandom_angles: (optional) a sequence of angles to include
                 that are not randomly generated upon calling this function.
@@ -752,6 +755,9 @@ def make_subject_images(mesh, curv, parc,
                 'ycoord': [figures of y coordinates in grayscale]
                 'zcoord': [figures of z coordinates in grayscale]
                 'angles': [angles used to generate figures, in same order]
+                ... optionally, a list of extra keys, the same keys as
+                given in extra_channels_dict, each containing a list of
+                figures of the corresponding stat maps.
     """
     from nilearn import plotting
 
@@ -765,6 +771,10 @@ def make_subject_images(mesh, curv, parc,
     xcoord_figs = []
     ycoord_figs = []
     zcoord_figs = []
+    if extra_channels_dict is not None:
+        extra_channel_figs = {}
+        for k, v in extra_channels_dict.items():
+            extra_channel_figs[k] = []
     return_dict = {}
 
     if angles is None:
@@ -823,6 +833,22 @@ def make_subject_images(mesh, curv, parc,
             ycoord_figs.append(y)
             zcoord_figs.append(z)
 
+        if extra_channels_dict is not None:
+            for key, statmap in extra_channels_dict.items():
+                # plot statmaps and save under channel key
+                above_parc_threshold = selected_parc.max() + 1.0  # set threshold to exclude parc
+                channel_fig, _ = plt.subplots(figsize=FIGSIZE)
+                plotting.plot_surf_roi(mesh, selected_parc
+                                       , view=(a[0], a[1])
+                                       , bg_map=statmap
+                                       # ,bg_on_data=True
+                                       , figure=channel_fig
+                                       , cmap='tab20'
+                                       , threshold=above_parc_threshold
+                                       # colorbar=True
+                                       )
+                extra_channel_figs[key].append(channel_fig)
+
     # package returns into single dictionary
     return_dict['mask'] = mask_figs
     return_dict['curv'] = curv_figs
@@ -831,6 +857,10 @@ def make_subject_images(mesh, curv, parc,
     return_dict['ycoord'] = ycoord_figs
     return_dict['zcoord'] = zcoord_figs
     return_dict['angles'] = angles
+
+    # add extra channels
+    for key, value in extra_channel_figs.items():
+        return_dict[key] = value
 
     return return_dict
 
