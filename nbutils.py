@@ -86,13 +86,7 @@ def get_subjects_df(directory, extract_dict=None):
     return make_fn_df(fns, extract_dict)
 
 LABELS_TO_PLOT = [2, 19, 21, 23, 24, 25, 30, 37, 38, 50, 51, 57, 58, 59, 60, 61, 63, 65]
-
-parc_path = f'{hbn_dir}/{sub}{label_subdir}/{parc_filename}'
-curv_path = f'{hbn_dir}/{sub}{surf_subdir}/{curv_filename}'
-infl_path = f'{hbn_dir}/{sub}{surf_subdir}/{infl_filename}'
-parc = surface.load_surf_data(parc_path)
-curv = surface.load_surf_data(curv_path)
-mesh = surface.load_surf_mesh(infl_path)
+hbn_dir = '/oak/stanford/groups/jyeatman/HBN/BIDS_curated/derivatives/freesurfer'
 
 
 def make_random_angles(n, center, scale):
