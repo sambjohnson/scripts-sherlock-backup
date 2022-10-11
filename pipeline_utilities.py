@@ -876,7 +876,8 @@ def process_figs(img_dict, ns=256):
                 matplotlib images; a subject from different angles. One key
                 (angles) corresponds to the respective angles.
                 keys: 'mask', 'curv', 'parc', 'xcoord', 'ycoord', 'zcoord'
-                    'angles'
+                    'angles', and optionally other keys for other
+                    stat_map channels.
                 vals: lists of images of the corresponding modality. Each
                     list entry should be a different view of the same subject.
                 ns: (int, optional) new pixel size of downsampled square image.
@@ -892,14 +893,19 @@ def process_figs(img_dict, ns=256):
                          'ycoord': process_coord_img,
                          'zcoord': process_coord_img
                          }
+    DEFAULT_CHANNEL_FUNCTION = process_curv_img
     npy_dict = {}
     npy_dict['angles'] = img_dict['angles']
     nangles = len(img_dict['angles'])
 
     for key, val in img_dict.items():
+        if key == 'angles':  # skip angles; no figures stored in this key
+            continue
         if key in PROCESS_FUNCTIONS:
             fn = PROCESS_FUNCTIONS[key]
-            npy_dict[key] = [fn(fig_to_PIL(fig)) for fig in img_dict[key]]
+        else:
+            fn = DEFAULT_CHANNEL_FUNCTION
+        npy_dict[key] = [fn(fig_to_PIL(fig)) for fig in img_dict[key]]
 
     return npy_dict
 
