@@ -370,16 +370,32 @@ def stitch_two_nps(np1, np2, second_to_onehot=True, n=None):
     return np3
 
 
-def stitch_nps(np_list, onehot_list, n=None):
-    new_np_list = []
-    for oh, arr in zip(np_list, onehot_list):
-        if oh:
-            arr = np_onehot(arr, n=n)
+def stitch_nps(nps, onehot_indices=None, n=None):
+    """
+        Stitches a list of np files together along
+        a last axis, optionally encoding some dimensions
+        as onehot vectors.
+        Arguments:
+            nps: list<np.array>, the arrays to concatenate along
+                a new axis
+            onehot_indices: (optional) list<int>, the indices of entries
+                in nps that specify which elements to convert to one-hot
+            n: number of one-hot dimensions (classes) if consistent across
+                inputs.
+        Returns:
+            The input arrays joined into a single new array as channels.
+    """
+    if onehot_indices is None:
+        onehot_indices = []
+
+    for i, arr in enumerate(nps):
+        if i in onehot_indices:
+            nps[i] = np_onehot(nps[i], n=n)
         else:
-            arr = np.expand_dims(arr, axis=2)
-        new_np_list.append(arr)
-    np3 = np.concatenate(tuple(new_np_list), axis=2)
-    return np3
+            nps[i] = np.expand_dims(arr, axis=2)
+    nps_concat = np.concatenate(tuple(nps), axis=2)
+
+    return nps_concat
 
 
 def stitch_files(f1, f2, save_fname, second_to_onehot=True, n=None,
@@ -955,7 +971,9 @@ def px2v_from_np_dict(np_dict, mesh_coords):
 
 
 def save_subject_npys(sub, np_dict, save_xdir, save_ydir,
-                      save_px2v_dir=None, save_pxcoord_dir=None):
+                      extra_channel_keys=None,
+                      save_px2v_dir=None,
+                      save_pxcoord_dir=None):
     """ Given subject images in the form of np_dict,
         saves .npy files corresponding to UNet x and y
         into two respective directories.
@@ -964,13 +982,21 @@ def save_subject_npys(sub, np_dict, save_xdir, save_ydir,
     import pickle
 
     angles = np_dict['angles']
+    if extra_channel_keys is None:
+        extra_channel_keys = []
 
     for i, a in enumerate(angles):
 
         np_curv = np_dict['curv'][i]
         np_mask = np_dict['mask'][i]
+        nps = [np_curv]
+        for k in extra_channel_keys:
+            nps.append(np_dict[k][i])
+        nps.append(np_mask)
+        onehot_indices = [1 + len(extra_channel_keys)]
 
-        np_x = stitch_two_nps(np_curv, np_mask)  # create single np array
+        # create single np array
+        np_x = stitch_nps(nps, onehot_indices=onehot_indices, n=None)
         np_y = np_dict['parc'][i]
         base_title = f'{sub}-{a[0]:.2f}-{a[1]:.2f}'
 
